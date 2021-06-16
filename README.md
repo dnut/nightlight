@@ -13,3 +13,4 @@ Run nightlight.py and keep it running continuously. The included systemd service
 - customizable hooks - not just ddccontrol and redshift
 - PKGBUILD
 - setup.py
+- non-loop mode for quick reset
