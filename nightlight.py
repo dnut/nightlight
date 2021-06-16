@@ -2,23 +2,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime as dt
+from datetime import datetime as dt, timezone, timedelta
 from enum import Enum
-from time import sleep
 import requests
 import subprocess
-
+import sys
+import time
 
 LAT = '38.8462'
 LNG = '-77.3064'
-NIGHT_TEMP = 3000
+NIGHT_TEMP = 2500
 
 
 def main():
     last = None
     while True:
         last = update(last)
-        sleep(300)
+        time.sleep(300)
 
 
 @dataclass
@@ -34,7 +34,8 @@ class Period(Enum):
 
 def update(last: Period):
     sched = get_schedule()
-    if sched.sunrise < dt.now().time() < sched.sunset and last != Period.DAY:
+    now = dt.now().time()
+    if sched.sunrise < now < sched.sunset and last != Period.DAY:
         set_day()
         return Period.DAY
     elif last != Period.NIGHT:
@@ -48,21 +49,37 @@ def get_schedule() -> SunSchedule:
     url = f'https://api.sunrise-sunset.org/json?lat={LAT}&lng={LNG}&date=today'
     response = requests.get(url).json()
     return SunSchedule(
-        dt.strptime(response['results']['sunrise'], '%I:%M:%S %p').time(),
-        dt.strptime(response['results']['sunset'], '%I:%M:%S %p').time(),
+        parse_utc_to_local(response['results']['sunrise'], '%I:%M:%S %p'),
+        parse_utc_to_local(response['results']['sunset'], '%I:%M:%S %p'),
     )
 
 
+def parse_utc_to_local(utc_timestamp: str, pattern: str):
+    return dt.strptime(utc_timestamp, pattern)\
+        .replace(tzinfo=timezone.utc)\
+        .astimezone(current_timezone())\
+        .time()
+
+
+def current_timezone():
+    if time.daylight:
+        return timezone(timedelta(seconds=-time.altzone),time.tzname[1])
+    else:
+        return timezone(timedelta(seconds=-time.timezone),time.tzname[0])
+
+
 def set_night():
-    print('goodnight!')
+    log('goodnight! setting to night mode.')
     set_brightness(0)
     set_color_temperature(NIGHT_TEMP)
+    log('night mode enabled.')
 
 
 def set_day():
-    print('good morning!')
+    log('good morning! setting to day mode.')
     set_brightness(100)
     set_color_temperature(None)
+    log('day mode enabled.')
 
 
 def set_brightness(brightness: int):
@@ -74,6 +91,11 @@ def set_color_temperature(temp: int):
         subprocess.run(['redshift', '-x'])
     else:
         subprocess.run(['redshift', '-PO', str(temp)])
+
+
+def log(msg):
+    print(msg)
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':

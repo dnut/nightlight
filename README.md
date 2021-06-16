@@ -11,3 +11,5 @@ Run nightlight.py and keep it running continuously. The included systemd service
 - gradual changes
 - more times than just sunrise and sunset
 - customizable hooks - not just ddccontrol and redshift
+- PKGBUILD
+- setup.py
