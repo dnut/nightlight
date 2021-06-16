@@ -18,7 +18,7 @@ def main():
     last = None
     while True:
         last = update(last)
-        time.sleep(300)
+        time.sleep(3)
 
 
 @dataclass
@@ -35,10 +35,11 @@ class Period(Enum):
 def update(last: Period):
     sched = get_schedule()
     now = dt.now().time()
+    log(sched, now)
     if sched.sunrise < now < sched.sunset and last != Period.DAY:
         set_day()
         return Period.DAY
-    elif last != Period.NIGHT:
+    elif sched.sunrise > now or now > sched.sunset and last != Period.NIGHT:
         set_night()
         return Period.NIGHT
     else:
@@ -93,8 +94,8 @@ def set_color_temperature(temp: int):
         subprocess.run(['redshift', '-PO', str(temp)])
 
 
-def log(msg):
-    print(msg)
+def log(*msg):
+    print(*msg)
     sys.stdout.flush()
 
 
