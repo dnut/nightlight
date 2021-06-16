@@ -11,6 +11,7 @@ import subprocess
 
 LAT = '38.8462'
 LNG = '-77.3064'
+NIGHT_TEMP = 3000
 
 
 def main():
@@ -55,13 +56,13 @@ def get_schedule() -> SunSchedule:
 def set_night():
     print('goodnight!')
     set_brightness(0)
-    set_color_temperature(3000)
+    set_color_temperature(NIGHT_TEMP)
 
 
 def set_day():
     print('good morning!')
     set_brightness(100)
-    set_color_temperature(3000)
+    set_color_temperature(None)
 
 
 def set_brightness(brightness: int):
