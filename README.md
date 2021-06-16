@@ -8,7 +8,7 @@ Run nightlight.py and keep it running continuously. The included systemd service
 
 ## todo
 - user config file
-- gradual changes
+- gradual changes (global and per-transition)
 - more times than just sunrise and sunset
 - customizable hooks - not just ddccontrol and redshift
 - PKGBUILD
