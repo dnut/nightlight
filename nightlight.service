@@ -1,0 +1,10 @@
+[Install]
+WantedBy=network.target
+
+[Unit]
+Description=Nightlight
+RefuseManualStart=no
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/nightlight
