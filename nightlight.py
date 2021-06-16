@@ -17,8 +17,11 @@ NIGHT_TEMP = 2500
 def main():
     last = None
     while True:
-        last = update(last)
-        time.sleep(3)
+        next_mode = get_next(last)
+        if next_mode != last:
+            switch_mode(next_mode)
+            last = next_mode
+        time.sleep(300)
 
 
 @dataclass
@@ -32,18 +35,22 @@ class Period(Enum):
     NIGHT = 'night'
 
 
-def update(last: Period):
+def get_next(last: Period):
     sched = get_schedule()
     now = dt.now().time()
-    log(sched, now)
     if sched.sunrise < now < sched.sunset and last != Period.DAY:
-        set_day()
         return Period.DAY
     elif sched.sunrise > now or now > sched.sunset and last != Period.NIGHT:
-        set_night()
         return Period.NIGHT
     else:
         return last
+
+
+def switch_mode(mode: Period):
+    {
+        Period.NIGHT: set_night,
+        Period.DAY: set_day
+    }[mode]()
 
 
 def get_schedule() -> SunSchedule:
